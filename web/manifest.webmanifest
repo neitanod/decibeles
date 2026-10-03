@@ -1,0 +1,24 @@
+{
+  "name": "Decibeles — sound level meter",
+  "short_name": "Decibeles",
+  "description": "Measure ambient noise in dB(A), dB(C) and dB(Z): live gauge, spectrum, exposure dose, noise traffic light and session history. Works offline.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f0e0c",
+  "theme_color": "#0f0e0c",
+  "categories": ["utilities", "health", "education"],
+  "lang": "es",
+  "icons": [
+    { "src": "/iconos/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/iconos/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/iconos/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/iconos/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Semáforo de ruido", "short_name": "Semáforo", "url": "/traffic-light", "icons": [{ "src": "/iconos/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Sesiones", "url": "/sessions", "icons": [{ "src": "/iconos/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
