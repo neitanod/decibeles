@@ -1423,6 +1423,10 @@ textarea { resize: vertical; }
 }
 
 @media (orientation: landscape) and (max-height: 560px) {
+  .tabbar a { flex-direction: row; justify-content: center; gap: 8px; padding: 8px 0 7px; }
+  .tabbar .icon { width: 19px; height: 19px; }
+  .view { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  .build-stamp { bottom: calc(env(safe-area-inset-bottom) + 1px); }
   .gauge { width: min(100%, 330px); }
   .panel { min-height: 0; }
   .chart, .wf-canvas { height: calc(100dvh - 190px); }
