@@ -9,6 +9,7 @@ import { getSettings, onSettings, saveSession } from './store.js'
 
 const LIVE_FRAMES = 1200 // 60 s at 20 frames per second
 const AUTOSAVE_MS = 15000
+const AUTOSAVE_MAX_MS = 120000
 const MIN_SAVE_SECONDS = 10
 const ALERT_GAP_MS = 4000
 
@@ -195,7 +196,7 @@ class Meter extends EventTarget {
     if (this.liveCount < LIVE_FRAMES) this.liveCount++
 
     this.checkAlert(now)
-    if (Date.now() - this.lastSave > AUTOSAVE_MS) this.autosave(false)
+    if (Date.now() - this.lastSave > this.autosaveEvery()) this.autosave(false)
     this.dispatchEvent(new CustomEvent('frame', { detail: frame }))
   }
 
@@ -246,13 +247,22 @@ class Meter extends EventTarget {
   autosave(force) {
     if (!getSettings().autosave) return false
     if (this.session.seconds < MIN_SAVE_SECONDS) return false
-    if (!force && Date.now() - this.lastSave < AUTOSAVE_MS) return false
+    if (!force && Date.now() - this.lastSave < this.autosaveEvery()) return false
     this.lastSave = Date.now()
     const record = this.record()
     saveSession(record)
       .then(() => this.dispatchEvent(new CustomEvent('saved', { detail: record })))
       .catch(() => {})
     return true
+  }
+
+  // Every save writes the whole record, which grows with the session (340 KB
+  // after 8 hours, measured with V8's serializer), so long sessions save less
+  // often: every 15 s at
+  // first, every 2 minutes from 4 hours on. Pausing, resetting and leaving
+  // the page still save at once.
+  autosaveEvery() {
+    return Math.min(AUTOSAVE_MAX_MS, Math.max(AUTOSAVE_MS, this.session.seconds * 1000 / 120))
   }
 
   // The running session as a storable record, with the calibration it used.

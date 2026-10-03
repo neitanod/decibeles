@@ -49,6 +49,8 @@ meter.addEventListener('frame', renderStatus)
 
 meter.addEventListener('alert', (e) => {
   const root = document.documentElement
+  // A red flash in the dark would wake whoever is being measured.
+  if (root.classList.contains('is-night')) return
   root.classList.remove('flash')
   void root.offsetWidth
   root.classList.add('flash')
