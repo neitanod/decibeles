@@ -26,7 +26,7 @@ class Meter extends EventTarget {
     this.node = null
     this.analyser = null
     this.levels = null
-    this.session = new SessionStats()
+    this.session = this.newSession()
     this.live = { A: liveRing(), C: liveRing(), Z: liveRing() }
     this.liveHead = 0
     this.liveCount = 0
@@ -37,9 +37,14 @@ class Meter extends EventTarget {
 
     document.addEventListener('visibilitychange', () => this.onVisibility())
     window.addEventListener('pagehide', () => this.autosave(true))
-    onSettings((key) => {
+    onSettings((key, value) => {
       if (key === 'wakeLock') this.syncWakeLock()
+      if (key === 'eventLevel') this.session.eventThreshold = value
     })
+  }
+
+  newSession() {
+    return new SessionStats({ eventThreshold: getSettings().eventLevel })
   }
 
   get sampleRate() {
@@ -143,7 +148,7 @@ class Meter extends EventTarget {
 
   reset() {
     const saved = this.autosave(true)
-    this.session = new SessionStats()
+    this.session = this.newSession()
     this.lastSave = 0
     this.dispatchEvent(new CustomEvent('reset', { detail: { saved } }))
   }
@@ -229,11 +234,16 @@ class Meter extends EventTarget {
     if (this.session.seconds < MIN_SAVE_SECONDS) return false
     if (!force && Date.now() - this.lastSave < AUTOSAVE_MS) return false
     this.lastSave = Date.now()
-    const record = this.session.toRecord()
+    const record = this.record()
     saveSession(record)
       .then(() => this.dispatchEvent(new CustomEvent('saved', { detail: record })))
       .catch(() => {})
     return true
+  }
+
+  // The running session as a storable record, with the calibration it used.
+  record() {
+    return { ...this.session.toRecord(), offset: getSettings().offset }
   }
 
   onVisibility() {

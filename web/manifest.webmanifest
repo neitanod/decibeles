@@ -9,16 +9,72 @@
   "orientation": "any",
   "background_color": "#0f0e0c",
   "theme_color": "#0f0e0c",
-  "categories": ["utilities", "health", "education"],
+  "categories": [
+    "utilities",
+    "health",
+    "education"
+  ],
   "lang": "es",
   "icons": [
-    { "src": "/iconos/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/iconos/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/iconos/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "/iconos/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+    {
+      "src": "/iconos/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/iconos/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/iconos/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/iconos/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
   ],
   "shortcuts": [
-    { "name": "Semáforo de ruido", "short_name": "Semáforo", "url": "/traffic-light", "icons": [{ "src": "/iconos/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Sesiones", "url": "/sessions", "icons": [{ "src": "/iconos/icon-192.png", "sizes": "192x192" }] }
+    {
+      "name": "Semáforo de ruido",
+      "short_name": "Semáforo",
+      "url": "/traffic-light",
+      "icons": [
+        {
+          "src": "/iconos/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Sesiones",
+      "url": "/sessions",
+      "icons": [
+        {
+          "src": "/iconos/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/meter-narrow.webp",
+      "sizes": "1170x2532",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Live meter with A-weighted level, session statistics and history"
+    },
+    {
+      "src": "/screenshots/meter-wide.webp",
+      "sizes": "1366x860",
+      "type": "image/webp",
+      "form_factor": "wide",
+      "label": "Meter and one-third octave spectrum on a large screen"
+    }
   ]
 }

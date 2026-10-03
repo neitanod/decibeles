@@ -75,7 +75,8 @@ export class Spectrum {
     const pw = w - PAD.l - PAD.r
     const ph = h - PAD.t - PAD.b
     const hiDb = this.hi, loDb = hiDb - 70
-    const yOf = (db) => PAD.t + ph * (1 - (Math.max(loDb, Math.min(hiDb, db)) - loDb) / (hiDb - loDb))
+    const yRaw = (db) => PAD.t + ph * (1 - (db - loDb) / (hiDb - loDb))
+    const yOf = (db) => yRaw(Math.max(loDb, Math.min(hiDb, db)))
 
     ctx.font = '500 9px "Martian Mono", ui-monospace, monospace'
     ctx.textBaseline = 'middle'
@@ -91,7 +92,9 @@ export class Spectrum {
 
     const slot = pw / BANDS.length
     const bw = Math.max(2, slot * 0.68)
-    const grad = zoneGradient(ctx, yOf)
+    // The gradient needs the unclamped mapping, or every zone squeezes into
+    // the visible range and a quiet band already looks orange.
+    const grad = zoneGradient(ctx, yRaw)
     const ink = cssVar('--ink')
     for (let i = 0; i < BANDS.length; i++) {
       const x = PAD.l + i * slot + (slot - bw) / 2

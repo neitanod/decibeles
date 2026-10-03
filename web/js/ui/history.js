@@ -95,6 +95,18 @@ export function drawHistory(canvas, values, opts = {}) {
     ctx.globalAlpha = 1
   }
 
+  // Noise events (session mode): shaded spans behind the line.
+  if (!live && opts.events && opts.events.length) {
+    ctx.fillStyle = cssVar('--z5')
+    ctx.globalAlpha = 0.13
+    for (const e of opts.events) {
+      const x0 = PAD.l + Math.min(1, e.t / span) * pw
+      const x1 = PAD.l + Math.min(1, (e.t + e.d) / span) * pw
+      ctx.fillRect(x0, PAD.t, Math.max(2, x1 - x0), ph)
+    }
+    ctx.globalAlpha = 1
+  }
+
   if (n > 1) {
     const grad = zoneGradient(ctx, yOf)
     ctx.save()

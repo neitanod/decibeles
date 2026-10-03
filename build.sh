@@ -11,8 +11,10 @@ rm -rf dist
 cp -r web dist
 cd dist
 
+# Store screenshots and the social card are for the install dialog and link
+# previews; the app never shows them, so they stay out of the precache.
 mapfile -t FILES < <(find . -type f ! -name 'service-worker.js' ! -name 'version.txt' \
-  ! -name '.htaccess' -printf '%P\n' | LC_ALL=C sort)
+  ! -name '.htaccess' ! -path './screenshots/*' ! -name 'og.png' -printf '%P\n' | LC_ALL=C sort)
 VERSION=$(cat "${FILES[@]}" | sha256sum | cut -c1-12)
 CACHE="decibeles-${VERSION}"
 echo "$CACHE" > version.txt

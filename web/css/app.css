@@ -1114,6 +1114,36 @@ html.is-immersive .light { min-height: 100dvh; margin: 0; border-radius: 0; bord
 }
 .markers b { font: 600 12px/1.4 'Martian Mono', monospace; color: var(--accent); }
 
+.ev-sum { margin: -2px 2px 10px; color: var(--ink-dim); }
+.ev-none { margin: 0 2px; }
+.ev-table {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.ev-table table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.ev-table th {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font: 500 9.5px/1.2 'Martian Mono', monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.ev-table td {
+  padding: 8px 12px;
+  border-bottom: 1px dashed var(--line);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ev-table tr:last-child td { border-bottom: 0; }
+.ev-table .ev-n { color: var(--ink-faint); font-family: 'Martian Mono', monospace; font-size: 11px; }
+.ev-table .ev-max { font: 700 18px/1 'Big Shoulders Display', sans-serif; color: var(--zc); }
+
+.print-only { display: none; }
+
 .fields { display: grid; gap: 14px; margin-top: 24px; }
 .field { display: grid; gap: 7px; }
 input[type='text'], input[type='number'], textarea {
@@ -1137,6 +1167,7 @@ textarea { resize: vertical; }
 .settings .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 14px 16px; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 46px; padding: 4px 0; font-size: 14.5px; }
 .row-label { margin: 12px 0 8px; font-size: 13.5px; color: var(--ink-dim); }
+.row-top { margin-top: 10px; }
 .row-label:first-child { margin-top: 2px; }
 .opts { display: grid; gap: 6px; }
 .opts-inline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -1331,6 +1362,33 @@ textarea { resize: vertical; }
   .dose { grid-template-columns: 1fr; justify-items: center; }
   .dose-info { width: 100%; }
   .ctl span { display: none; }
+}
+
+/* --- Print: the session report ------------------------------------------- */
+
+@media print {
+  @page { margin: 14mm; }
+  html, body { background: #fff !important; }
+  body::before,
+  .topbar, .tabbar, .install-bar, .toast, .build-stamp, #update-toast,
+  .back, .notice, .page-actions, .fields, .detail .seg { display: none !important; }
+  .print-only { display: block !important; }
+  .view { max-width: none; padding: 0 !important; overflow: visible; }
+  .card, .grid-stats, .lrow, .ev-table { box-shadow: none; break-inside: avoid; }
+  .h2 { break-after: avoid; }
+  .detail-big b { font-size: 64px; }
+  .print-head {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .print-head b { font: 800 24px/1 'Big Shoulders Display', sans-serif; letter-spacing: 0.06em; }
+  .print-head span { font: 600 11px/1 'Martian Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; }
+  .print-note b { display: block; margin-top: 18px; font-size: 16px; }
+  .print-note p { margin: 4px 0 0; white-space: pre-wrap; }
 }
 
 /* --- Motion ---------------------------------------------------------------- */

@@ -78,3 +78,34 @@ test('record round-trips through JSON', () => {
   assert.equal(r.markers[0].label, 'bus')
   assert.ok(Math.abs(r.summary.A.leq - 55) < 1e-9)
 })
+
+test('a loud stretch becomes one event, with its duration and maximum', () => {
+  const s = new SessionStats({ eventThreshold: 70 })
+  for (let i = 0; i < 40; i++) s.add(frame(50))          // warm-up
+  for (let i = 0; i < 40; i++) s.add(frame(75))          // 2 s loud
+  s.add(frame(82))
+  for (let i = 0; i < 10; i++) s.add(frame(60))          // 0.5 s dip: same event
+  for (let i = 0; i < 20; i++) s.add(frame(72))          // 1 s loud
+  for (let i = 0; i < 40; i++) s.add(frame(50))          // 2 s quiet: closes it
+  assert.equal(s.events.length, 1)
+  const e = s.events[0]
+  assert.equal(e.max, 82)
+  assert.ok(Math.abs(e.d - 3.55) < 0.06, `duration ${e.d}`)
+  assert.ok(Math.abs(e.t - 2) < 0.06, `start ${e.t}`)
+})
+
+test('blips shorter than half a second are not events', () => {
+  const s = new SessionStats({ eventThreshold: 70 })
+  for (let i = 0; i < 40; i++) s.add(frame(50))
+  for (let i = 0; i < 5; i++) s.add(frame(90))
+  for (let i = 0; i < 40; i++) s.add(frame(50))
+  assert.equal(s.events.length, 0)
+})
+
+test('an event still going on shows up in the record', () => {
+  const s = new SessionStats({ eventThreshold: 70 })
+  for (let i = 0; i < 40; i++) s.add(frame(50))
+  for (let i = 0; i < 30; i++) s.add(frame(80))
+  assert.equal(s.events.length, 0)
+  assert.equal(s.toRecord().events.length, 1)
+})

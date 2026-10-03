@@ -23,7 +23,7 @@ function mount(root, params) {
 
   async function load() {
     live = meter.session.id === id && meter.state !== 'idle'
-    record = live ? meter.session.toRecord() : await getSession(id)
+    record = live ? meter.record() : await getSession(id)
     if (live) {
       // Keep the name and note typed on a saved copy of the running session.
       const saved = await getSession(id)
@@ -45,6 +45,7 @@ function mount(root, params) {
     const seg = (v) => `<button type="button" role="radio" data-w="${v}" aria-checked="${v === w}">${v}</button>`
     root.innerHTML = `
       <section class="detail" style="--zc: var(${z.css})">
+        <div class="print-only print-head"><b>DECIBELES</b><span>${t('print.title')}</span></div>
         <a class="back" href="/sessions">${icon('back')}<span>${t('detail.back')}</span></a>
         ${live ? `<p class="notice">${icon('wave')}<span>${t('detail.inProgress')}</span></p>` : ''}
         <header class="detail-head">
@@ -80,9 +81,14 @@ function mount(root, params) {
         <h2 class="h2">${t('detail.distribution')}</h2>
         <div class="card"><canvas class="chart chart-short" id="cDist"></canvas></div>
 
+        ${eventsSection(record)}
+
         ${record.markers && record.markers.length ? `
           <h2 class="h2">${t('detail.markers')}</h2>
           <ol class="markers">${record.markers.map((m) => `<li><b>${fmtClock(m.t)}</b>${esc(m.label)}</li>`).join('')}</ol>` : ''}
+
+        ${record.name || record.note ? `<div class="print-only print-note"><b>${esc(record.name)}</b><p>${esc(record.note)}</p></div>` : ''}
+        <p class="print-only fine">${t('print.footer', { offset: (record.offset ?? getSettings().offset).toFixed(1) })}</p>
 
         <div class="fields">
           <label class="field"><span class="k">${t('detail.name')}</span>
@@ -93,6 +99,7 @@ function mount(root, params) {
 
         <div class="page-actions">
           <button type="button" class="btn-primary" id="aShare">${icon('share')}<span>${t('detail.share')}</span></button>
+          <button type="button" class="btn-ghost" id="aPrint">${icon('print')}<span>${t('detail.print')}</span></button>
           <button type="button" class="btn-ghost" id="aCsv">${icon('download')}<span>${t('detail.csv')}</span></button>
           <button type="button" class="btn-ghost" id="aJson">${icon('download')}<span>${t('detail.json')}</span></button>
           ${live ? '' : `<button type="button" class="btn-ghost danger" id="aDel">${icon('trash')}<span>${t('detail.delete')}</span></button>`}
@@ -108,6 +115,7 @@ function mount(root, params) {
       mode: 'session',
       leq: record.summary[w].leq,
       markers: (record.markers || []).map((m) => m.t),
+      events: record.events || [],
     })
     time._range = null
     drawDistribution(root.querySelector('#cDist'), record.hist[w])
@@ -123,7 +131,7 @@ function mount(root, params) {
         meter.session.name = record.name
         meter.session.note = record.note
       }
-      await saveSession(live ? meter.session.toRecord() : record)
+      await saveSession(live ? meter.record() : record)
       toast(t('detail.saved'), { ms: 1200 })
     }, 600)
   }
@@ -139,6 +147,8 @@ function mount(root, params) {
     else if (b.id === 'aShare') {
       const r = await shareRecord(record, w)
       if (r === 'downloaded') toast(t('share.saved'))
+    } else if (b.id === 'aPrint') {
+      window.print()
     } else if (b.id === 'aCsv') {
       const rows = ['second,LAeq_1s,LCeq_1s,LZeq_1s,LAFmax_1s']
       const sr = record.series
@@ -162,7 +172,7 @@ function mount(root, params) {
       if (meter.session.id !== id || meter.state === 'idle') return
       const focused = document.activeElement && ['fName', 'fNote'].includes(document.activeElement.id)
       if (focused) return
-      record = { ...meter.session.toRecord(), name: record.name, note: record.note }
+      record = { ...meter.record(), name: record.name, note: record.note }
       render()
     }, 5000)
   }
@@ -170,13 +180,61 @@ function mount(root, params) {
   const onResize = () => record && draw()
   window.addEventListener('resize', onResize)
 
+  // Paper prints well on paper: switch the skin for the printout and redraw
+  // the charts with its colors, then put everything back.
+  let themeBefore = null
+  const beforePrint = () => {
+    themeBefore = document.documentElement.dataset.theme
+    document.documentElement.dataset.theme = 'papel'
+    if (record) draw()
+  }
+  const afterPrint = () => {
+    if (themeBefore) document.documentElement.dataset.theme = themeBefore
+    themeBefore = null
+    if (record) draw()
+  }
+  window.addEventListener('beforeprint', beforePrint)
+  window.addEventListener('afterprint', afterPrint)
+
   load().then(render)
 
   return () => {
     clearInterval(tick)
     clearTimeout(saveTimer)
     window.removeEventListener('resize', onResize)
+    window.removeEventListener('beforeprint', beforePrint)
+    window.removeEventListener('afterprint', afterPrint)
   }
+}
+
+function eventsSection(r) {
+  const events = r.events || []
+  const level = r.eventThreshold ?? 70
+  if (!events.length) {
+    return `<h2 class="h2">${t('detail.events', { level })}</h2><p class="fine ev-none">${t('detail.noEvents', { level })}</p>`
+  }
+  const total = events.reduce((a, e) => a + e.d, 0)
+  const summary = events.length === 1
+    ? t('detail.eventsSummaryOne', { time: fmtSeconds(total) })
+    : t('detail.eventsSummary', { n: events.length, time: fmtSeconds(total) })
+  const rows = events.map((e, i) => `
+    <tr>
+      <td class="ev-n">${i + 1}</td>
+      <td>${fmtDate(r.startedAt + e.t * 1000, { timeStyle: 'medium' })} <span class="k">+${fmtClock(e.t)}</span></td>
+      <td>${fmtSeconds(e.d)}</td>
+      <td class="ev-max" style="--zc: var(${ZONES[zoneIndex(e.max)].css})">${fmtDb(e.max)}</td>
+    </tr>`).join('')
+  return `
+    <h2 class="h2">${t('detail.events', { level })}</h2>
+    <p class="k ev-sum">${summary}</p>
+    <div class="ev-table"><table>
+      <thead><tr><th>#</th><th>${t('detail.colTime')}</th><th>${t('detail.colDuration')}</th><th>${t('detail.colMax')}</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`
+}
+
+function fmtSeconds(s) {
+  return s < 60 ? `${s.toFixed(1)} ${t('units.s')}` : fmtSpan(s)
 }
 
 function cell(k, v) {

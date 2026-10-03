@@ -13,6 +13,7 @@ export const DEFAULTS = {
   alertOn: false,
   alertLevel: 85,
   alertVibrate: true,
+  eventLevel: 70,
   lightGreen: 55,
   lightRed: 70,
   lightAvg: 3,

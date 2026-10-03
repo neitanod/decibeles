@@ -154,6 +154,7 @@ function mount(root) {
         leq: meter.session.leq(s.weighting),
         alert: s.alertOn ? s.alertLevel : null,
         markers: meter.session.markers.map((m) => m.t),
+        events: live ? null : meter.session.allEvents(),
       })
       dirty = easing
     } else if (p === 'spectrum') {

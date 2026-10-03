@@ -54,6 +54,8 @@ function mount(root) {
         ${radio('timeWeighting', 'F', s.timeWeighting, t('set.tF'))}
         ${radio('timeWeighting', 'S', s.timeWeighting, t('set.tS'))}
       </div>
+      <div class="row row-top"><span>${t('set.eventLevel')}</span>${stepper('eventLevel', s.eventLevel, 40, 130, 1, 'dB(A)')}</div>
+      <p class="fine">${t('set.eventHint')}</p>
     </div>
   </div>
 

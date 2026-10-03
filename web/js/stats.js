@@ -50,8 +50,14 @@ function binOf(db) {
   return Math.min(BINS - 1, Math.max(0, Math.floor(db * 10)))
 }
 
+// A noise event starts when LAF reaches the threshold, and ends after a full
+// second below it. Shorter than half a second does not count.
+const EVENT_MIN_SECONDS = 0.5
+const EVENT_GAP_SECONDS = 1
+const MAX_EVENTS = 500
+
 export class SessionStats {
-  constructor({ id, startedAt } = {}) {
+  constructor({ id, startedAt, eventThreshold = 70 } = {}) {
     this.id = id || newId()
     this.startedAt = startedAt || Date.now()
     this.updatedAt = this.startedAt
@@ -62,6 +68,9 @@ export class SessionStats {
     this.series = { A: [], C: [], Z: [], AFmax: [] }
     this.acc = { A: 0, C: 0, Z: 0, t: 0, afmax: -Infinity }
     this.markers = []
+    this.eventThreshold = eventThreshold
+    this.events = []
+    this.current = null
     this.name = ''
     this.note = ''
   }
@@ -88,10 +97,42 @@ export class SessionStats {
       }
     }
     if (warm && frame.peak > this.peak) this.peak = frame.peak
+    if (warm) this.trackEvent(frame.A.f, dt)
     if (frame.A.s >= NIOSH.threshold) this.dose += dt / allowedSeconds(frame.A.s)
     if (frame.A.f > this.acc.afmax) this.acc.afmax = frame.A.f
     this.acc.t += dt
     if (this.acc.t >= 1) this.flushSecond()
+  }
+
+  trackEvent(laf, dt) {
+    const c = this.current
+    if (laf >= this.eventThreshold) {
+      if (!c) this.current = { t: this.seconds - dt, d: dt, max: laf, quiet: 0 }
+      else {
+        c.d += c.quiet + dt
+        c.quiet = 0
+        if (laf > c.max) c.max = laf
+      }
+    } else if (c) {
+      c.quiet += dt
+      if (c.quiet >= EVENT_GAP_SECONDS) {
+        this.closeEvent()
+      }
+    }
+  }
+
+  closeEvent() {
+    const c = this.current
+    this.current = null
+    if (c && c.d >= EVENT_MIN_SECONDS && this.events.length < MAX_EVENTS) {
+      this.events.push(eventRecord(c))
+    }
+  }
+
+  // Closed events plus the one still going on, if it already counts.
+  allEvents() {
+    const c = this.current
+    return c && c.d >= EVENT_MIN_SECONDS ? [...this.events, eventRecord(c)] : this.events.slice()
   }
 
   flushSecond() {
@@ -152,8 +193,18 @@ export class SessionStats {
       },
       hist: { A: this.histogram('A'), C: this.histogram('C'), Z: this.histogram('Z') },
       markers: this.markers.slice(),
+      eventThreshold: this.eventThreshold,
+      events: this.allEvents(),
     }
   }
+}
+
+function eventRecord(c) {
+  return { t: round1(c.t), d: round1(c.d), max: round1(c.max) }
+}
+
+function round1(v) {
+  return Math.round(v * 10) / 10
 }
 
 function finite(v) {
