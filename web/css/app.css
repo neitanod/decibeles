@@ -917,13 +917,24 @@ html.flash::after {
 .light-hint {
   position: absolute;
   left: 20px;
-  right: 170px;
-  bottom: 14px;
+  right: 20px;
+  bottom: 66px;
   margin: 0;
   font-size: 12px;
   color: var(--ink-faint);
 }
-.light-fs { position: absolute; z-index: 3; right: 14px; bottom: 10px; }
+.light-ctl {
+  position: absolute;
+  z-index: 3;
+  left: 14px;
+  right: 14px;
+  bottom: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.light.is-paused .light-num,
+.light.is-paused .lamps { opacity: 0.45; }
 
 html.is-immersive .topbar,
 html.is-immersive .tabbar,

@@ -39,7 +39,8 @@ function mount(root) {
     const st = meter.state
     section.dataset.state = st
     section.classList.toggle('is-hold', !!meter.hold)
-    const live = st === 'running' || st === 'paused'
+    // A resume goes through 'starting' too; the screen keeps the session up.
+    const live = st === 'running' || st === 'paused' || (st === 'starting' && meter.session.seconds > 0)
     $('cta').hidden = live
     $('desc').hidden = !live
     $('startBtn').disabled = st === 'starting'
@@ -50,8 +51,9 @@ function mount(root) {
       err.textContent = t(meter.error.key, { msg: meter.error.msg })
       $('startLabel').textContent = t('err.retry')
     } else err.hidden = true
-    $('btnToggle').innerHTML = icon(st === 'running' ? 'pause' : 'play')
-    $('btnToggle').setAttribute('aria-label', t(st === 'running' ? 'ctl.pause' : st === 'paused' ? 'ctl.resume' : 'start.button'))
+    const busy = st === 'running' || st === 'starting'
+    $('btnToggle').innerHTML = icon(busy ? 'pause' : 'play')
+    $('btnToggle').setAttribute('aria-label', t(busy ? 'ctl.pause' : st === 'paused' ? 'ctl.resume' : 'start.button'))
     for (const id of ['btnReset', 'btnHold', 'btnMark', 'btnShare']) $(id).disabled = !live
     $('btnHold').setAttribute('aria-pressed', meter.hold ? 'true' : 'false')
     if (!live) {
@@ -236,10 +238,8 @@ function mount(root) {
     const b = e.target.closest('button')
     if (!b) return
     if (b.id === 'startBtn') meter.start()
-    else if (b.id === 'btnToggle') {
-      if (meter.state === 'running') meter.pause()
-      else meter.start()
-    } else if (b.id === 'btnReset') {
+    else if (b.id === 'btnToggle') meter.toggle()
+    else if (b.id === 'btnReset') {
       const saved = meter.session.seconds >= 10 && getSettings().autosave
       meter.reset()
       if (saved) toast(t('ctl.resetDone'))

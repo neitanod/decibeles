@@ -34,6 +34,7 @@ class Meter extends EventTarget {
     this.lastSave = 0
     this.lastAlert = 0
     this.wakeLock = null
+    this.attempt = 0
 
     document.addEventListener('visibilitychange', () => this.onVisibility())
     window.addEventListener('pagehide', () => this.autosave(true))
@@ -56,11 +57,15 @@ class Meter extends EventTarget {
     this.dispatchEvent(new CustomEvent('state', { detail: state }))
   }
 
+  // Starts measuring, or resumes a paused session: resuming opens the
+  // microphone again and keeps adding to the same session.
   async start() {
     if (this.state === 'running' || this.state === 'starting') return
-    if (this.state === 'paused') return this.resume()
     this.error = null
     this.setState('starting')
+    const attempt = ++this.attempt
+    let stream = null
+    let ctx = null
     try {
       if (!window.isSecureContext) throw named('InsecureError')
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.AudioWorkletNode) {
@@ -68,7 +73,7 @@ class Meter extends EventTarget {
       }
       // Every voice-call processing step off: echo cancellation, noise
       // suppression and automatic gain would each bend the reading.
-      this.stream = await navigator.mediaDevices.getUserMedia({
+      stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: false,
           noiseSuppression: false,
@@ -77,60 +82,67 @@ class Meter extends EventTarget {
         },
         video: false,
       })
-      const ctx = new AudioContext({ latencyHint: 'interactive' })
-      this.ctx = ctx
+      ctx = new AudioContext({ latencyHint: 'interactive' })
       await ctx.audioWorklet.addModule('/js/meter-worklet.js')
-      const source = ctx.createMediaStreamSource(this.stream)
-      this.node = new AudioWorkletNode(ctx, 'meter', {
+      const source = ctx.createMediaStreamSource(stream)
+      const node = new AudioWorkletNode(ctx, 'meter', {
         numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1],
       })
-      this.analyser = ctx.createAnalyser()
-      this.analyser.fftSize = 8192
-      this.analyser.smoothingTimeConstant = 0.55
-      this.analyser.minDecibels = -140
-      this.analyser.maxDecibels = 0
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 8192
+      analyser.smoothingTimeConstant = 0.55
+      analyser.minDecibels = -140
+      analyser.maxDecibels = 0
       // The worklet has to reach the destination to be pulled by the graph;
       // the gain of zero keeps the microphone out of the speaker.
       const mute = ctx.createGain()
       mute.gain.value = 0
-      source.connect(this.node)
-      source.connect(this.analyser)
-      this.node.connect(mute)
+      source.connect(node)
+      source.connect(analyser)
+      node.connect(mute)
       mute.connect(ctx.destination)
-      this.node.port.onmessage = (e) => this.onFrame(e.data)
-      const track = this.stream.getAudioTracks()[0]
-      if (track) track.addEventListener('ended', () => this.stop())
       await ctx.resume()
+      // Paused or stopped while the microphone was opening: drop this graph.
+      if (attempt !== this.attempt) throw named('Superseded')
+      node.port.onmessage = (e) => this.onFrame(e.data)
+      const track = stream.getAudioTracks()[0]
+      if (track) track.addEventListener('ended', () => { if (this.stream === stream) this.stop() })
+      Object.assign(this, { stream, ctx, node, analyser })
       this.setState('running')
       this.syncWakeLock()
     } catch (e) {
-      this.teardown()
+      if (stream) stream.getTracks().forEach((t) => t.stop())
+      if (ctx) ctx.close().catch(() => {})
+      if (attempt !== this.attempt) return
       this.error = classify(e)
       this.setState('error')
     }
   }
 
+  // Pausing releases the microphone, so the system's mic indicator goes off,
+  // and resuming builds a fresh audio graph. AudioContext.suspend()/resume()
+  // was the first approach and misbehaved on a phone: after resuming, the
+  // meter could not be paused again.
   pause() {
-    if (this.state !== 'running') return
-    this.ctx.suspend()
+    if (this.state !== 'running' && this.state !== 'starting') return
+    this.attempt++
+    this.teardown()
     this.setState('paused')
     this.autosave(true)
     this.syncWakeLock()
   }
 
-  async resume() {
-    if (this.state !== 'paused') return
-    await this.ctx.resume()
-    this.setState('running')
-    this.syncWakeLock()
+  resume() {
+    if (this.state === 'paused') return this.start()
   }
 
   toggle() {
-    if (this.state === 'running') this.pause()
+    if (this.state === 'running' || this.state === 'starting') this.pause()
     else this.start()
   }
 
   stop() {
+    this.attempt++
     this.autosave(true)
     this.teardown()
     this.setState('idle')
@@ -138,6 +150,7 @@ class Meter extends EventTarget {
   }
 
   teardown() {
+    if (this.node) this.node.port.onmessage = null
     if (this.stream) this.stream.getTracks().forEach((t) => t.stop())
     if (this.ctx) this.ctx.close().catch(() => {})
     this.stream = null
@@ -160,6 +173,7 @@ class Meter extends EventTarget {
   }
 
   onFrame(raw) {
+    if (this.state !== 'running') return
     const off = getSettings().offset
     const frame = { dt: raw.dt, peak: 20 * Math.log10(Math.max(raw.peak, 1e-10)) + off }
     for (const k of WEIGHTINGS) {

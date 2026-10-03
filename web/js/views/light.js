@@ -49,9 +49,14 @@ function mount(root) {
   }
 
   function renderState() {
-    const live = meter.state === 'running' || meter.state === 'paused'
+    const st = meter.state
+    const live = st === 'running' || st === 'paused' || (st === 'starting' && meter.session.seconds > 0)
     view.dataset.live = String(live)
     $('tap').hidden = live
+    const busy = st === 'running' || st === 'starting'
+    $('pp').hidden = !live
+    $('pp').innerHTML = icon(busy ? 'pause' : 'play') + `<span>${t(busy ? 'ctl.pause' : 'ctl.resume')}</span>`
+    view.classList.toggle('is-paused', st === 'paused')
     if (!live) {
       view.dataset.color = ''
       color = ''
@@ -74,6 +79,10 @@ function mount(root) {
   }
 
   root.addEventListener('click', (e) => {
+    if (e.target.closest('#pp')) {
+      meter.toggle()
+      return
+    }
     if (e.target.closest('#fs')) {
       if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
       else document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {
@@ -82,7 +91,7 @@ function mount(root) {
       })
       return
     }
-    if (meter.state !== 'running') meter.start()
+    if (meter.state === 'idle' || meter.state === 'error') meter.start()
   })
 
   const onFrame = (e) => update(e.detail)
@@ -123,6 +132,9 @@ function template() {
   </div>
   <button type="button" class="light-tap" id="tap">${icon('mic')}<span>${t('light.start')}</span></button>
   <p class="light-hint">${t('light.hint')}</p>
-  <button type="button" class="btn-ghost light-fs" id="fs"></button>
+  <div class="light-ctl">
+    <button type="button" class="btn-ghost" id="pp" hidden></button>
+    <button type="button" class="btn-ghost" id="fs"></button>
+  </div>
 </section>`
 }
