@@ -756,7 +756,7 @@ html.flash::after {
 }
 .ring-text b { font: 800 40px/0.9 'Big Shoulders Display', sans-serif; }
 .ring-text small { font-size: 20px; margin-left: 1px; }
-.ring-text span {
+.ring-text > span {
   max-width: 84px;
   font: 500 8.5px/1.25 'Martian Mono', monospace;
   letter-spacing: 0.08em;
@@ -1134,12 +1134,13 @@ input[type='text']:focus, input[type='number']:focus, textarea:focus {
 textarea { resize: vertical; }
 
 .settings .group { margin-bottom: 4px; }
-.settings .card { display: grid; gap: 2px; padding: 14px 16px; }
+.settings .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 14px 16px; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 46px; padding: 4px 0; font-size: 14.5px; }
 .row-label { margin: 12px 0 8px; font-size: 13.5px; color: var(--ink-dim); }
 .row-label:first-child { margin-top: 2px; }
 .opts { display: grid; gap: 6px; }
-.opts-inline { grid-auto-flow: column; grid-auto-columns: 1fr; }
+.opts-inline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.opts-inline .opt { gap: 8px; padding: 12px 10px; font-size: 13.5px; }
 .opt {
   display: flex;
   align-items: center;
@@ -1251,7 +1252,7 @@ textarea { resize: vertical; }
 .dot.g { background: var(--z1); }
 .dot.r { background: var(--z5); }
 
-.themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.themes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .theme-opt {
   position: relative;
   display: flex;

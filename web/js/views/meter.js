@@ -186,6 +186,8 @@ function mount(root) {
     const ring = panel.querySelector('.ring-fg')
     const C = 2 * Math.PI * 52
     ring.style.strokeDasharray = `${(Math.min(100, pct) / 100) * C} ${C}`
+    // A round cap on a zero-length stroke still paints a dot.
+    ring.style.opacity = pct > 0.05 ? '1' : '0'
     ring.style.stroke = `var(${pct >= 100 ? '--z5' : pct >= 50 ? '--z4' : pct >= 25 ? '--z3' : '--z1'})`
     panel.querySelector('#dosePct').textContent = pct < 10 ? pct.toFixed(1) : Math.round(pct)
     const las = meter.levels ? meter.levels.A.s : null
