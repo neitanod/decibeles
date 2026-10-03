@@ -51,6 +51,7 @@
       <symbol id="i-install" viewBox="0 0 24 24"><path d="M12 3v11M7.5 9.5L12 14l4.5-4.5"/><rect x="4" y="17" width="16" height="4" rx="1.2"/></symbol>
       <symbol id="i-code" viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/></symbol>
       <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.6A8 8 0 0 1 9.4 4.5a8 8 0 1 0 10.1 10.1z"/></symbol>
       <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2.5 12h2.5l2-5 3 10 3-14 3 12 2-3h3.5"/></symbol>
     </defs>
   </svg>
@@ -71,7 +72,10 @@
       </svg>
       <span class="brand-word">Decibeles</span>
     </a>
-    <div class="status" id="status" data-state="idle"><i></i><span data-i18n="status.idle">Listo</span></div>
+    <div class="topbar-end">
+      <a class="topbtn" href="/night" data-i18n-label="night.title" aria-label="Modo nocturno"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg></a>
+      <div class="status" id="status" data-state="idle"><i></i><span data-i18n="status.idle">Listo</span></div>
+    </div>
   </header>
 
   <main id="view" class="view"></main>

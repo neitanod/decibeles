@@ -246,6 +246,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   letter-spacing: 0.07em;
 }
 
+.topbar-end { display: flex; align-items: center; gap: 8px; }
+.topbtn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--ink-dim);
+}
+.topbtn .icon { width: 17px; height: 17px; }
+.topbtn:hover { color: var(--accent); }
+
 .status {
   display: inline-flex;
   align-items: center;
@@ -942,6 +956,52 @@ html.is-immersive .install-bar,
 html.is-immersive .build-stamp { display: none !important; }
 html.is-immersive .view { padding: 0; max-width: none; }
 html.is-immersive .light { min-height: 100dvh; margin: 0; border-radius: 0; border: 0; }
+
+/* --- Night mode ----------------------------------------------------------- */
+
+html.is-night, html.is-night body { background: #000 !important; }
+html.is-night body::before { display: none; }
+.night {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: #000;
+  cursor: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.night-box {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  color: color-mix(in srgb, var(--accent) 42%, #000);
+  transition: transform 3s ease-in-out;
+}
+.night-num {
+  font: 800 clamp(120px, 38vw, 300px)/0.8 'Big Shoulders Display', sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.night-unit, .night-meta {
+  font: 500 12px/1 'Martian Mono', monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.night-meta { display: flex; align-items: center; gap: 10px; opacity: 0.8; }
+.night-meta i { width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
+.night-hint {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: #6b625a;
+  transition: opacity 1.2s;
+}
+.night-hint.is-gone { opacity: 0; }
 
 /* --- Pages: sessions, detail, settings ------------------------------------ */
 

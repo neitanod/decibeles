@@ -1,7 +1,7 @@
 {
-  "name": "Decibeles — sound level meter",
+  "name": "Decibeles — medidor de ruido",
   "short_name": "Decibeles",
-  "description": "Measure ambient noise in dB(A), dB(C) and dB(Z): live gauge, spectrum, exposure dose, noise traffic light and session history. Works offline.",
+  "description": "Medí el ruido ambiente en dB(A), dB(C) y dB(Z): dial en vivo, espectro, dosis de exposición, semáforo de ruido, eventos e historial de sesiones. Funciona sin conexión.",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -14,7 +14,7 @@
     "health",
     "education"
   ],
-  "lang": "es",
+  "lang": "es-AR",
   "icons": [
     {
       "src": "/iconos/icon-192.png",
@@ -51,6 +51,17 @@
       ]
     },
     {
+      "name": "Modo nocturno",
+      "short_name": "Noche",
+      "url": "/night",
+      "icons": [
+        {
+          "src": "/iconos/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "Sesiones",
       "url": "/sessions",
       "icons": [
@@ -67,14 +78,14 @@
       "sizes": "1170x2532",
       "type": "image/webp",
       "form_factor": "narrow",
-      "label": "Live meter with A-weighted level, session statistics and history"
+      "label": "Medidor en vivo con nivel ponderado A, estadísticas de la sesión e historia"
     },
     {
       "src": "/screenshots/meter-wide.webp",
       "sizes": "1366x860",
       "type": "image/webp",
       "form_factor": "wide",
-      "label": "Meter and one-third octave spectrum on a large screen"
+      "label": "Medidor y espectro en tercios de octava en pantalla grande"
     }
   ]
 }

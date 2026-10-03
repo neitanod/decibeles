@@ -13,6 +13,7 @@ import lightView from './views/light.js'
 import sessionsView from './views/sessions.js'
 import sessionView from './views/session.js'
 import settingsView from './views/settings.js'
+import nightView from './views/night.js'
 import notFound from './views/notfound.js'
 
 const THEME_COLORS = { estudio: '#0f0e0c', fosforo: '#030805', papel: '#ece5d8' }
@@ -72,6 +73,7 @@ route(/^\/traffic-light$/, lightView)
 route(/^\/sessions$/, sessionsView)
 route(/^\/sessions\/([^/]+)$/, sessionView)
 route(/^\/settings$/, settingsView)
+route(/^\/night$/, nightView)
 startRouter(document.getElementById('view'), { notFound, changed: highlightNav })
 
 onSettings((key, value) => {

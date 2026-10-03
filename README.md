@@ -32,12 +32,17 @@ sample is processed on the device.
 - **Noise traffic light** for classrooms, offices and workshops: full screen,
   configurable thresholds, averaged over a few seconds so one slammed door
   does not flip it to red.
+- **Noise events:** every stretch above a configurable threshold (70 dB(A)
+  by default) for half a second or more is logged with its time, duration
+  and maximum — handy to document a noise nuisance.
+- **Night mode** to measure all night: an almost black screen with dim
+  digits that drift every minute, the screen kept on, and double-tap to exit.
 - **Level alert** with vibration and a screen flash.
 - **Markers** to tag moments during a measurement ("a bus went by").
 - **Session history** saved automatically on the device (IndexedDB), with a
   detail page per session: timeline, level distribution, name and notes.
-- **Exports:** a shareable image card, CSV (one row per second) and JSON;
-  export and import of the whole history.
+- **Exports:** a shareable image card, a printable report (or PDF), CSV
+  (one row per second) and JSON; export and import of the whole history.
 - **Calibration** against a reference meter, or by hand.
 - **Three skins** (Studio, Phosphor, Paper), **Spanish and English**.
 - **Installable PWA:** works offline, updates itself, keeps the screen on
@@ -53,6 +58,9 @@ keeps the Fast (125 ms) and Slow (1 s) exponential averages plus the block
 energy that Leq integrates. Twenty times per second it posts mean-square
 values to the main thread, which applies the calibration offset and converts
 to decibels.
+
+Pausing releases the microphone (the system's mic indicator goes off) and
+resuming builds a fresh audio graph that keeps adding to the same session.
 
 The weighting filters are tested against the nominal values of IEC 61672-1
 at 44.1 and 48 kHz (`tests/weighting.test.mjs`).

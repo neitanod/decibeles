@@ -33,12 +33,19 @@ muestra se procesa en el dispositivo.
 - **Semáforo de ruido** para el aula, la oficina o el taller: pantalla
   completa, umbrales configurables y promedio de algunos segundos, así un
   portazo no lo pone en rojo.
+- **Eventos ruidosos:** cada tramo por encima de un umbral configurable
+  (70 dB(A) por defecto) durante medio segundo o más queda anotado con su
+  hora, duración y máximo — sirve para documentar ruidos molestos.
+- **Modo nocturno** para medir toda la noche: pantalla casi negra con los
+  números tenues, que se corren cada minuto, la pantalla siempre encendida y
+  doble toque para salir.
 - **Alerta de nivel** con vibración y un destello en la pantalla.
 - **Marcas** para señalar momentos durante una medición («pasó un colectivo»).
 - **Historial de sesiones** guardado solo en el dispositivo (IndexedDB), con
   una página por sesión: evolución, distribución del nivel, nombre y notas.
-- **Exportaciones:** una tarjeta en imagen para compartir, CSV (una fila por
-  segundo) y JSON; exportar e importar el historial completo.
+- **Exportaciones:** una tarjeta en imagen para compartir, un reporte
+  imprimible (o en PDF), CSV (una fila por segundo) y JSON; exportar e
+  importar el historial completo.
 - **Calibración** contra un sonómetro de referencia, o a mano.
 - **Tres temas** (Estudio, Fósforo, Papel), **castellano e inglés**.
 - **PWA instalable:** funciona sin conexión, se actualiza sola, mantiene la
@@ -54,6 +61,9 @@ y mantiene los promedios exponenciales Fast (125 ms) y Slow (1 s) más la
 energía de cada bloque, que es lo que integra el Leq. Veinte veces por segundo
 le pasa los valores cuadráticos medios al hilo principal, que aplica el offset
 de calibración y convierte a decibeles.
+
+Pausar suelta el micrófono (se apaga el indicador del sistema) y reanudar arma
+un grafo de audio nuevo que sigue sumando a la misma sesión.
 
 Los filtros de ponderación se prueban contra los valores nominales de
 IEC 61672-1 a 44,1 y 48 kHz (`tests/weighting.test.mjs`).

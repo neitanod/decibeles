@@ -96,6 +96,10 @@ const STRINGS = {
     'light.hint': 'Ideal para el aula, la oficina o el taller. Los umbrales se cambian en Ajustes.',
     'light.redFor': 'En rojo {pct} % del tiempo',
 
+    'night.title': 'Modo nocturno',
+    'night.hint': 'Tocá dos veces para salir. La medición sigue con la pantalla casi negra.',
+    'night.events': '{n} eventos',
+
     'sessions.title': 'Sesiones',
     'sessions.empty': 'Todavía no hay sesiones guardadas. Cada medición de más de 10 segundos se guarda sola.',
     'sessions.emptyOff': 'El guardado automático está apagado. Activalo en Ajustes para que tus mediciones queden acá.',
@@ -298,6 +302,10 @@ const STRINGS = {
     'light.start': 'Tap to start measuring',
     'light.hint': 'Great for classrooms, offices and workshops. Change the thresholds in Settings.',
     'light.redFor': 'Red {pct} % of the time',
+
+    'night.title': 'Night mode',
+    'night.hint': 'Double-tap to exit. Measuring goes on with an almost black screen.',
+    'night.events': '{n} events',
 
     'sessions.title': 'Sessions',
     'sessions.empty': 'No saved sessions yet. Every measurement longer than 10 seconds is saved automatically.',
